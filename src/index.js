@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const crypto = require('crypto');
 const locutores = require('./locutores');
 
 const app = express();
@@ -13,7 +14,7 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-// Meus código =>>>
+// Meus códigos =>>>
 
 // Requisito 1 >>
 
@@ -31,6 +32,12 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(locutoresIds);
   }
     res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+});
+
+// requisito 3 >>
+
+app.post('/login', async (req, res) => {
+    res.status(200).json({ token: crypto.randomBytes(8).toString('hex') });
 });
 
 // <<<= Fim dos Códigos.
