@@ -23,7 +23,7 @@ app.get('/talker', async (req, res) => {
   res.status(200).json(lista);
 });
 
-// requisito 2 >>
+// Requisito 2 >>
 
 app.get('/talker/:id', async (req, res) => {
   const lista = await locutores.locutor();
@@ -34,31 +34,36 @@ app.get('/talker/:id', async (req, res) => {
     res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
-// requisito 3 e requisito 4 >>
+// Requisitos 3 e 4 >>
 
 const validate = (req, res, next) => {
   const { email, password } = req.body;
   
   if (!email) {
-    res.status(400).json({ message: 'o campo email é obrigatório' });
+    res.status(400).json({ message: 'O campo "email" é obrigatório' });
   }
 
   if (!Object.values(email).includes('@')) {
-    res.status(400).json({ message: 'o campo email deve ter um email válido' });
+    res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
   }
 
   if (!password) {
-    res.status(400).json({ message: 'o campo password é obrigatório' });
+    res.status(400).json({ message: 'O campo "password" é obrigatório' });
   }
 
   if (Object.values(password).length < 6) {
-    res.status(400).json({ message: 'o campo password deve ter pelo menos 6 caracteres' });
+    res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
   }
   next();
 };
 app.post('/login', validate, (req, res) => {
     res.status(200).json({ token: crypto.randomBytes(8).toString('hex') });
 });
+
+// Requisito 5 >>
+
+// app.post('/talker', (req, res) => {});
+
 // <<<= Fim dos Códigos.
 
 app.listen(PORT, () => {
