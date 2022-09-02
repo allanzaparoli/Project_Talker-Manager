@@ -11,6 +11,4 @@ async function locutor() {
   }
 }
 
-module.exports = {
-  locutor,
-};
+module.exports = locutor;

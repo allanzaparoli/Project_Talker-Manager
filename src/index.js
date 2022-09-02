@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
-const locutores = require('./locutores');
+const locutor = require('./locutores');
 const validarNome = require('./middlewares/validarNome');
 const validarIdade = require('./middlewares/validarIdade');
 const validarAuthorization = require('./middlewares/validarAuthorization');
@@ -26,14 +26,14 @@ app.get('/', (_request, response) => {
 // Requisito 1 >>
 
 app.get('/talker', async (req, res) => {
-  const lista = await locutores.locutor();
+  const lista = await locutor();
   res.status(200).json(lista);
 });
 
 // Requisito 2 >>
 
 app.get('/talker/:id', async (req, res) => {
-  const lista = await locutores.locutor();
+  const lista = await locutor();
   const locutoresIds = lista.find(({ id }) => id === Number(req.params.id));
   if (locutoresIds) {
     return res.status(200).json(locutoresIds);
@@ -78,19 +78,44 @@ app.post('/talker',
   validarNome,
   async (req, res) => {
     const { name, age, talk } = req.body;
-    const lerArquivo = await fs.readFile('src/talker.json', 'utf-8');
-    const mudandoFs = JSON.parse(lerArquivo);
-    const ultimaPosicao = mudandoFs.length - 1;
-    const addLocutor = [...mudandoFs, {
-      id: mudandoFs[ultimaPosicao].id + 1,
+    const lerArquivo = await locutor();
+    const ultimaPosicao = lerArquivo.length - 1;
+    const addLocutor = [...lerArquivo, {
+      id: lerArquivo[ultimaPosicao].id + 1,
       name,
       age,
       talk,
     }];
     const data = JSON.stringify(addLocutor);
     await fs.writeFile('src/talker.json', data);
-    res.status(201).json({ id: mudandoFs[ultimaPosicao].id + 1, name, age, talk });
+    res.status(201).json({ id: lerArquivo[ultimaPosicao].id + 1, name, age, talk });
   });
+
+  // Requisito 6 >>
+
+  app.put('/talker/:id',
+  validarAuthorization,
+  validarTalk,
+  validarRate,
+  validarWatchedAt, 
+  validarIdade,
+  validarNome,
+  async (req, res) => {
+      const { id } = req.params;
+      const { name, age, talk } = req.body;
+      const lerArquivo = await locutor();
+      const reduce = lerArquivo.reduce((acc, curr) => {
+        if (curr.id === +id) {
+          acc.push({ id: +id, name, age, talk });
+          return acc;
+        }
+        acc.push(curr);
+        return acc;
+      }, []);
+      const data = JSON.stringify(reduce);
+      await fs.writeFile('src/talker.json', data);
+      res.status(200).json({ id: +id, name, age, talk });
+    });
 
 // <<<= Fim dos Códigos.
 
