@@ -1,7 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const crypto = require('crypto');
+const fs = require('fs').promises;
 const locutores = require('./locutores');
+const validarNome = require('./middlewares/validarNome');
+const validarIdade = require('./middlewares/validarIdade');
+const validarAuthorization = require('./middlewares/validarAuthorization');
+const validarTalk = require('./middlewares/validarTalk');
+const validarWatchedAt = require('./middlewares/validarWatchedAt');
+const validarRate = require('./middlewares/validarRate');
+const generateToken = require('./utils/generateToken');
 
 const app = express();
 app.use(bodyParser.json());
@@ -57,12 +64,33 @@ const validate = (req, res, next) => {
   next();
 };
 app.post('/login', validate, (req, res) => {
-    res.status(200).json({ token: crypto.randomBytes(8).toString('hex') });
+    res.status(200).json({ token: generateToken() });
 });
 
 // Requisito 5 >>
 
-// app.post('/talker', (req, res) => {});
+app.post('/talker',
+  validarAuthorization,
+  validarTalk,
+  validarRate,
+  validarWatchedAt, 
+  validarIdade,
+  validarNome,
+  async (req, res) => {
+    const { name, age, talk } = req.body;
+    const lerArquivo = await fs.readFile('src/talker.json', 'utf-8');
+    const mudandoFs = JSON.parse(lerArquivo);
+    const ultimaPosicao = mudandoFs.length - 1;
+    const addLocutor = [...mudandoFs, {
+      id: mudandoFs[ultimaPosicao].id + 1,
+      name,
+      age,
+      talk,
+    }];
+    const data = JSON.stringify(addLocutor);
+    await fs.writeFile('src/talker.json', data);
+    res.status(201).json({ id: mudandoFs[ultimaPosicao].id + 1, name, age, talk });
+  });
 
 // <<<= Fim dos Códigos.
 
