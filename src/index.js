@@ -30,6 +30,23 @@ app.get('/talker', async (req, res) => {
   res.status(200).json(lista);
 });
 
+// Requisito 8 >>
+
+app.get('/talker/search?', validarAuthorization, async (req, res) => {
+  const { q } = req.query;
+  const lerArquivo = await locutor();
+  const pesquisar = lerArquivo.filter((element) => element.name.includes(q));
+  
+  if (!q) {
+    return res.status(200).json(lerArquivo);
+  }
+  
+  if (!pesquisar) {
+    return res.status(200).json([]);
+  }
+  res.status(200).json(pesquisar);
+});
+
 // Requisito 2 >>
 
 app.get('/talker/:id', async (req, res) => {
