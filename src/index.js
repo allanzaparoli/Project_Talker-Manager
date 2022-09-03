@@ -117,6 +117,18 @@ app.post('/talker',
       res.status(200).json({ id: +id, name, age, talk });
     });
 
+  // Requisito 7 >>
+
+  app.delete('/talker/:id', validarAuthorization, async (req, res) => {
+    const { id } = req.params;
+    const lerArquivo = await locutor();
+    const filtroId = lerArquivo.findIndex((element) => element.id === +id);
+      const index = lerArquivo.indexOf(filtroId);
+      lerArquivo.splice(index, 1);
+      await fs.writeFile('src/talker.json', JSON.stringify(lerArquivo));
+      res.status(204).json({});
+  });
+
 // <<<= Fim dos Códigos.
 
 app.listen(PORT, () => {
